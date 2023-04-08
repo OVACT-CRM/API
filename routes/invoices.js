@@ -13,10 +13,29 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+
+// GET all invoices for a client
+router.get('/client/:clientID', async (req, res) => {
+  try {
+    const clientID = req.params.clientID;
+    const invoices = await Invoice.find({ client: clientID });
+    res.json(invoices);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
+
 // Get a specific invoice by ID
 router.get('/:id', getInvoice, (req, res) => {
   res.json(res.invoice);
 });
+
+
+
 
 // Create a new invoice
 router.post('/', async (req, res) => {

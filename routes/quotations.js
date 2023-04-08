@@ -84,12 +84,16 @@ router.patch('/:id', getQuotation, async (req, res) => {
 });
 
 // DELETE a quotation
-router.delete('/:id', getQuotation, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    await res.quotation.remove();
+    const quotation = await Quotation.findByIdAndDelete(req.params.id);
+    if (!quotation) {
+      return res.status(404).json({ message: 'Quotation not found' });
+    }
     res.json({ message: 'Quotation deleted' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
@@ -108,5 +112,35 @@ async function getQuotation(req, res, next) {
   res.quotation = quotation;
   next();
 }
+
+
+
+// Duplicate a quotation
+router.post('/:id/duplicate', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const quotation = await Quotation.findById(id);
+    if (!quotation) {
+      return res.status(404).json({ message: 'Quotation not found' });
+    }
+
+    // Create a new quotation object with the same data as the original
+    const newQuotation = new Quotation({
+      client: quotation.client,
+      subject: quotation.subject,
+      designations: quotation.designations,
+      total: quotation.total
+    });
+
+    // Save the new quotation to the database
+    const savedQuotation = await newQuotation.save();
+    res.status(201).json(savedQuotation);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+
 
 module.exports = router;
