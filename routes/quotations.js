@@ -74,7 +74,9 @@ router.patch('/:id', getQuotation, async (req, res) => {
   if (req.body.date != null) {
     res.quotation.createdAt = req.body.date;
   }
-
+  if (req.body.subject != null) {
+    res.quotation.subject = req.body.subject;
+  }
   try {
     const updatedQuotation = await res.quotation.save();
     res.json(updatedQuotation);
