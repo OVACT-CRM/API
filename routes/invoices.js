@@ -47,9 +47,21 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'No quotations selected' });
     }
 
-    //const total = selectedQuotations.reduce((sum, quotation) => sum + quotation.total, 0);
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+
+    const invoiceCountForMonth = await Invoice.countDocuments({
+      createdAt: {
+        $gte: new Date(year, month - 1, 1),
+        $lt: new Date(year, month, 1)
+      }
+    });
+
+    const invoiceId = `Z${year}${month}${String(invoiceCountForMonth + 1).padStart(2, "0")}`;
 
     const invoice = new Invoice({
+      invoiceId,
       client,
       quotations,
       total,
@@ -177,5 +189,22 @@ async function getInvoice(req, res, next) {
     res.status(500).json({ message: error.message });
   }
 }
+
+
+
+
+// Delete an invoice
+router.delete('/:id', getInvoice, async (req, res) => {
+  try {
+    await res.invoice.remove();
+    res.json({ message: 'Invoice Deleted Successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
+
 
 module.exports = router;

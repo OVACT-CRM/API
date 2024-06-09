@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 // Define invoice schema
 const invoiceSchema = new mongoose.Schema({
+  invoiceId: { type: String },
   client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
   quotations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Quotation', required: true }],
   total: { type: Number, required: true },
