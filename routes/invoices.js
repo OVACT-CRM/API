@@ -116,8 +116,30 @@ router.patch('/:id/date', getInvoice, async (req, res) => {
 
   try {
     const invoice = res.invoice;
-    invoice.createdAt = date;
+
+    // Parse the new date
+    const newDate = new Date(date);
+    const newDateYear = newDate.getFullYear();
+    const newDateMonth = String(newDate.getMonth() + 1).padStart(2, "0");
+
+    // Count documents in the new month and year
+    const invoiceCountForMonth = await Invoice.countDocuments({
+      createdAt: {
+        $gte: new Date(newDateYear, newDateMonth - 1, 1),
+        $lt: new Date(newDateYear, newDateMonth, 1)
+      }
+    });
+
+    // Generate the new invoiceId
+    const invoiceId = `Z${newDateYear}${newDateMonth}${String(invoiceCountForMonth + 1).padStart(2, "0")}`;
+
+    // Update the invoice fields
+    invoice.createdAt = newDate;
+    invoice.invoiceId = invoiceId;
+
+    // Save the updated invoice
     await invoice.save();
+    
     res.json(invoice);
   } catch (error) {
     res.status(400).json({ message: `Error updating invoice date: ${error.message}` });
