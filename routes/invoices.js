@@ -139,7 +139,7 @@ router.patch('/:id/date', getInvoice, async (req, res) => {
 
     // Save the updated invoice
     await invoice.save();
-    
+
     res.json(invoice);
   } catch (error) {
     res.status(400).json({ message: `Error updating invoice date: ${error.message}` });
@@ -215,12 +215,34 @@ async function getInvoice(req, res, next) {
 
 
 
+
+// Helper function to get a specific invoice by ID and attach it to the request object
+async function getInvoice(req, res, next) {
+  const id = req.params.id;
+
+  try {
+    const invoice = await Invoice.findById(id).populate('client').populate('quotations');
+    if (!invoice) {
+      console.log(`Invoice with ID ${id} not found`);
+      return res.status(404).json({ message: 'Invoice not found' });
+    }
+
+    res.invoice = invoice;
+    next();
+  } catch (error) {
+    console.error(`Error retrieving invoice: ${error.message}`);
+    res.status(500).json({ message: error.message });
+  }
+}
+
 // Delete an invoice
 router.delete('/:id', getInvoice, async (req, res) => {
   try {
-    await res.invoice.remove();
+    await Invoice.deleteOne({ _id: res.invoice._id });
+    console.log(`Invoice with ID ${res.invoice._id} deleted successfully`);
     res.json({ message: 'Invoice Deleted Successfully' });
   } catch (error) {
+    console.error(`Error deleting invoice: ${error.message}`);
     res.status(500).json({ message: error.message });
   }
 });
