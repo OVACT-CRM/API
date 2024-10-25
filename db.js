@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const url = 'mongodb+srv://agencezogma:EKCqSU3VQvMYMJBM@zogcrm.ngyj4q6.mongodb.net/test';
+const url = 'your-mongodb-url';
 
 mongoose.connect(url, {
   useNewUrlParser: true,
